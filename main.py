@@ -6,7 +6,7 @@ import os
  
 import time
  
-# Iniciar o navegador Firefox
+# Iniciar o navegador Chrome
 download_dir = os.path.join(os.getcwd(), "my_downloads")
 chrome_options = webdriver.ChromeOptions()
 prefs = {
@@ -19,37 +19,51 @@ prefs = {
 chrome_options.add_experimental_option("prefs", prefs)
 browser = webdriver.Chrome(options=chrome_options)
 
-
+wait = WebDriverWait(browser, timeout=80)
+usuario = "*******" # Coloque o seu usuário do portal do Aluno FAM
+senha = "*******" # Coloque a sua senha do portal do Aluno FAM
     
 # Navegar para a página
 browser.get('https://portaldoaluno.eusoufam.com.br/FrameHTML/web/app/Edu/PortalEducacional/login/#xd_co_f=Zjk0YmFiMWEtZDk5MS00MThiLWFjM2ItYzQwMGJmMDBmYWQ0~')
  
-time.sleep(2)
+ # Espera até que os campos de usuário e senha estejam visíveis
+wait.until(
+    EC.element_to_be_clickable((By.XPATH, '//*[@id="User"]'))
+)
+wait.until(
+    EC.element_to_be_clickable((By.XPATH, '//*[@id="Pass"]'))
+)
  
-# Preencher os campos e submeter o formulário
-browser.find_element(By.XPATH, '//*[@id="User"]').send_keys('********')
-browser.find_element(By.XPATH, '//*[@id="Pass"]').send_keys('********')
+# Preencher os campos e clica no botão de login
+browser.find_element(By.XPATH, '//*[@id="User"]').send_keys(usuario)
+browser.find_element(By.XPATH, '//*[@id="Pass"]').send_keys(senha)
 browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/form/div[4]/input').click()
 
-time.sleep(10)
+# Espera até o menu carregar
+wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="show-menu"]')))
 
-browser.find_element(By.XPATH, '//*[@id="show-menu"]').click()#Xpah do click 
+# Navega pelo menu lateral até a área de financeiro
+browser.find_element(By.XPATH, '//*[@id="show-menu"]').click()
 browser.find_element(By.XPATH, '//*[@id="EDU_PORTAL_FINANCEIRO_NOVO"]').click()
 
-time.sleep(3)
+# Espera o boleto carregar
+wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@class="check-box-select-boleto ng-pristine ng-untouched ng-valid"]')))
 
+# Navega pelos pop-ups 
 browser.find_element(By.XPATH, '//*[@class="check-box-select-boleto ng-pristine ng-untouched ng-valid"]').click()
 browser.find_element(By.XPATH, '//*[@ng-click="controller.exibirDadosPix()"]').click()
 
-time.sleep(5)
+wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@class="payments-botao-content payments-botaoAzul payments-formapgto alerta-prox-vencimento-buttons ng-binding ng-scope"]')))
 
+# Clica no botão de Gerar QR CODE
 browser.find_element(By.XPATH, '//*[@class="payments-botao-content payments-botaoAzul payments-formapgto alerta-prox-vencimento-buttons ng-binding ng-scope"]').click()
 
-time.sleep(8)
+wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@download="qrCode.png"]')))
 
+# Baixa o QR CODE
 browser.find_element(By.XPATH, '//*[@download="qrCode.png"]').click()
 
-time.sleep(3)
+time.sleep(60)
 
 browser.quit()
-# Aguardar 2 segundos para o carregamento da página
+# Aguarda 2 minutos para o encerramento da página (temporário)
